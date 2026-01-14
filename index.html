@@ -606,6 +606,8 @@
 
             const handleSubmit = (e) => {
                 e.preventDefault();
+                
+                // 1. Monta o texto com os dados do formulário
                 const text = `
 *Nova Solicitação de Orçamento - Site Vamus Decorar*
 ------------------------------------------------
@@ -616,7 +618,13 @@
 *Mensagem:* ${formState.message}
                 `.trim();
 
-                const whatsappUrl = `${SITE_CONTENT.general.whatsappLink}?text=${encodeURIComponent(text)}`;
+                // 2. Defina o número AQUI (apenas números, com código do país 55 e DDD)
+                // Estou usando o número que vi no seu rodapé: (85) 99420-7215
+                const phoneNumber = "5585994207215"; 
+
+                // 3. Cria o link direto (bypass no encurtador w.app para garantir que o texto vá junto)
+                const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(text)}`;
+                
                 window.open(whatsappUrl, '_blank');
                 setFormState({ name: '', email: '', phone: '', type: '', message: '' });
             };
