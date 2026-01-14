@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vamus Decorar | Soluções Profissionais em Acústica</title>
+    
+    <!-- React & ReactDOM (Motor do Site) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (Tradutor de código) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS (Estilos) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Fonte e Animações */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Montserrat', sans-serif; }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        /* * ==================================================================================
+         * SISTEMA DE ÍCONES (EMBUTIDO)
+         * Definidos manualmente para garantir que funcionam localmente sem internet rápida.
+         * ==================================================================================
+         */
+        const IconBase = ({ size = 24, className = "", children, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{children}</svg>
+        );
+
+        const Volume2 = (p) => <IconBase {...p}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></IconBase>;
+        const VolumeX = (p) => <IconBase {...p}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" /></IconBase>;
+        const CheckCircle2 = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></IconBase>;
+        const Hammer = (p) => <IconBase {...p}><path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9" /><path d="M17.64 15 22 10.64" /><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V7.86c0-.55-.45-1-1-1H16.4c-.84 0-1.65-.33-2.25-.93L12.9 4.68" /><path d="M15 12l-8.5 8.5" /></IconBase>;
+        const Mic2 = (p) => <IconBase {...p}><path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12" /><circle cx="17" cy="7" r="5" /></IconBase>;
+        const Building2 = (p) => <IconBase {...p}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /><path d="M10 6h4" /><path d="M10 10h4" /><path d="M10 14h4" /><path d="M10 18h4" /></IconBase>;
+        const Phone = (p) => <IconBase {...p}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></IconBase>;
+        const Mail = (p) => <IconBase {...p}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></IconBase>;
+        const MapPin = (p) => <IconBase {...p}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></IconBase>;
+        const Menu = (p) => <IconBase {...p}><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></IconBase>;
+        const X = (p) => <IconBase {...p}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></IconBase>;
+        const ArrowRight = (p) => <IconBase {...p}><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></IconBase>;
+        const Layers = (p) => <IconBase {...p}><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></IconBase>;
+        const Component = (p) => <IconBase {...p}><path d="M5.5 8.5 9 12l-3.5 3.5L2 12l3.5-3.5Z" /><path d="m12 2 3.5 3.5L12 7 8.5 3.5 12 2Z" /><path d="M18.5 8.5 22 12l-3.5 3.5L15 12l3.5-3.5Z" /><path d="m12 17 3.5 3.5L12 24l-3.5-3.5 3.5-3.5Z" /></IconBase>;
+        const Quote = (p) => <IconBase {...p}><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /></IconBase>;
+        const Instagram = (p) => <IconBase {...p}><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></IconBase>;
+        const Linkedin = (p) => <IconBase {...p}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect width="4" height="12" x="2" y="9" /><circle cx="4" cy="4" r="2" /></IconBase>;
+        const Waves = (p) => <IconBase {...p}><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" /><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" /><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" /></IconBase>;
+        const Ear = (p) => <IconBase {...p}><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0" /><path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 0 4 0v-1a3 3 0 0 1 3 3v1a2 2 0 0 1-4 0v-1" /></IconBase>;
+        const ShieldAlert = (p) => <IconBase {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="M12 8v4" /><path d="M12 16h.01" /></IconBase>;
+        const DoorOpen = (p) => <IconBase {...p}><path d="M13 4h3a2 2 0 0 1 2 2v14" /><path d="M2 20h3" /><path d="M13 20h9" /><path d="M10 12v.01" /><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z" /></IconBase>;
+        const Grid = (p) => <IconBase {...p}><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M3 9h18" /><path d="M9 21V9" /></IconBase>;
+        const Music = (p) => <IconBase {...p}><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></IconBase>;
+        const Factory = (p) => <IconBase {...p}><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" /><path d="M17 18h1" /><path d="M12 18h1" /><path d="M7 18h1" /></IconBase>;
+        const PenTool = (p) => <IconBase {...p}><path d="m12 19 7-7 3 3-7 7-3-3z" /><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" /><path d="m2 2 7.586 7.586" /><circle cx="11" cy="11" r="2" /></IconBase>;
+        const HardHat = (p) => <IconBase {...p}><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z" /><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5" /><path d="M4 15v-3a6 6 0 0 1 6-6h0" /><path d="M14 6a6 6 0 0 1 6 9v3" /></IconBase>;
+        const Award = (p) => <IconBase {...p}><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></IconBase>;
+        const Church = (p) => <IconBase {...p}><path d="M18 22H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2Z" /><path d="M12 7V3" /><path d="M10 5h4" /><path d="M12 14v4" /><path d="M10 16h4" /></IconBase>;
+        const Briefcase = (p) => <IconBase {...p}><rect width="20" height="14" x="2" y="7" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></IconBase>;
+        const Dumbbell = (p) => <IconBase {...p}><path d="M14.4 14.4 9.6 9.6" /><path d="M18.657 7.343l-4 4" /><path d="M21 3l-5 5" /><path d="M3 21l5-5" /><path d="M9.343 18.657l-4 4" /><path d="M13 22l8-8" /><path d="M3 11l8-8" /></IconBase>;
+        const Home = (p) => <IconBase {...p}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></IconBase>;
+        const Building = (p) => <IconBase {...p}><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /><path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" /><path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" /><path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" /></IconBase>;
+
+        /**
+         * ==================================================================================
+         * 🎨 CENTRAL DE CONTROLE DA MARCA (Edite aqui!)
+         * ==================================================================================
+         */
+        const SITE_CONTENT = {
+            theme: {
+                primaryColor: "#476654", 
+                accentColor: "#476654",  
+                secondaryColor: "#2a4034", 
+                lightBg: "#ffffff",      
+                offWhite: "#eff3f1",     
+            },
+            general: {
+                brandName: "Vamus Decorar",
+                // Link direto do Google Drive convertido
+                logoUrl: "./img/logo.png",
+                whatsappLink: "https://w.app/bq63ue", // COLOQUE SEU NÚMERO AQUI
+                ctaText: "Solicite uma Avaliação",
+            },
+            hero: {
+                title: "Acústica Técnica com Design Premium",
+                subtitle: "A união perfeita entre engenharia sonora e estética. Transformamos ambientes barulhentos em espaços de conforto e produtividade.",
+                buttonText: "Falar com Especialista",
+                backgroundImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop"
+            },
+            problems: {
+                title: "Problemas com Acústica?",
+                subtitle: "Ruído excessivo e eco não são apenas incômodos: eles afetam a saúde, a produtividade e o conforto.",
+                cards: [
+                    { title: "Eco e Reverberação", description: "Dificuldade para entender conversas, som 'embolado' e ambiente cansativo.", icon: Waves },
+                    { title: "Ruído Externo", description: "Barulho da rua ou de vizinhos invadindo seu espaço de foco e descanso.", icon: Ear },
+                    { title: "Falta de Privacidade", description: "Vazamento de som entre salas de reunião, consultórios ou apartamentos.", icon: ShieldAlert }
+                ]
+            },
+            about: {
+                title: "Muito além da espuma acústica",
+                text1: "A Vamus Decorar nasceu do universo da decoração e evoluiu para a engenharia sonora. Nosso diferencial é entregar o resultado técnico sem sacrificar a beleza do ambiente.",
+                text2: "Fabricamos nossos próprios painéis e gerenciamos a obra do início ao fim. Sem improvisos, apenas soluções definitivas.",
+                stats: [
+                    { label: "Obras Entregues", value: "+150" },
+                    { label: "Anos de Mercado", value: "8" },
+                    { label: "Garantia Técnica", value: "100%" }
+                ],
+                // FOTO TÉCNICA ATUALIZADA: Ambiente com painéis acústicos visíveis e harmonizados
+                image: "./img/foto_about.png"
+            },
+            services: {
+                title: "Soluções Vamus Decorar",
+                description: "Atuamos diretamente na causa do problema com fabricação própria e instalação especializada.",
+                items: [
+                    { title: "Painéis Absorvedores", description: "Painéis decorativos de alta densidade que eliminam o eco sem prejudicar o design.", icon: Layers },
+                    { title: "Isolamento (Drywall)", description: "Paredes e contra-paredes acústicas com lã de rocha para bloqueio total de ruído.", icon: VolumeX },
+                    { title: "Forros e Nuvens", description: "Soluções suspensas e baffles para tratamento de grandes áreas e pé-direito alto.", icon: Grid },
+                    { title: "Portas e Vedação", description: "Kits de vedação e portas acústicas para garantir o silêncio absoluto entre cômodos.", icon: DoorOpen },
+                    { title: "Pisos e Carpetes", description: "Revestimentos de alto fluxo que reduzem ruído de impacto (toc-toc) e melhoram o conforto.", icon: CheckCircle2 },
+                    { title: "Bass Traps", description: "Armadilhas de graves essenciais para estúdios e salas de música, controlando frequências baixas.", icon: Music },
+                    { title: "Igrejas e Templos", description: "Projetos focados na inteligibilidade da palavra falada e conforto dos fiéis.", icon: Building2 },
+                    { title: "Estúdios e Home Theater", description: "Projetos de alta performance para gravação, mixagem ou entretenimento residencial.", icon: Mic2 },
+                    { title: "Consultoria & Projeto", description: "Análise técnica, laudos e projetos 3D para indicar a solução exata.", icon: Component }
+                ]
+            },
+            differentials: {
+                title: "Diferenciais",
+                subtitle: "Por que escolher a Vamus Decorar?",
+                description: "Somos especialistas em entregar resultados acústicos reais.",
+                // FOTO DO DIFERENCIAL (Vertical, madeira, plantas)
+                image: "./img/foto_diferenciais.png",
+                list: [
+                    { title: "Fabricação Própria", text: "Controle absoluto da qualidade. Produzimos nossos painéis garantindo densidade correta e acabamento perfeito.", icon: Factory },
+                    { title: "Design Integrado", text: "Nossas soluções não são apenas funcionais, elas valorizam e modernizam a arquitetura.", icon: PenTool },
+                    { title: "Execução Completa", text: "Zero dor de cabeça. Cuidamos do projeto, fabricação, instalação e limpeza final da obra.", icon: HardHat },
+                    { title: "Técnica Comprovada", text: "Utilizamos materiais certificados e cálculos de engenharia para resultados reais.", icon: Award }
+                ]
+            },
+            segments: {
+                title: "Onde Atuamos",
+                subtitle: "Soluções acústicas especializadas para cada tipo de ambiente",
+                items: [
+                    { title: "Igrejas e Templos", image: "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=2673&auto=format&fit=crop", icon: Church },
+                    { title: "Escritórios", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2600&auto=format&fit=crop", icon: Briefcase },
+                    { title: "Estúdios", image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2670&auto=format&fit=crop", icon: Mic2 },
+                    { title: "Academias", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2670&auto=format&fit=crop", icon: Dumbbell },
+                    { title: "Residências", image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2653&auto=format&fit=crop", icon: Home },
+                    { title: "Condomínios", image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2670&auto=format&fit=crop", icon: Building }
+                ]
+            },
+            testimonials: {
+                title: "O que dizem nossos clientes",
+                subtitle: "Histórias reais de quem transformou seu ambiente com a Vamus Decorar",
+                items: [
+                    {
+                        name: "Joyce Ary",
+                        role: "Restaurante Aquarela Sabor e Arte",
+                        text: "Enfrentávamos um grande desafio, pois a acústica era muito ruim e vários clientes reclamavam do excesso de ruído. Após as adequações, o resultado foi excelente. Hoje, o ambiente está muito mais confortável, agradável e acolhedor. A diferença é nítida e os feedbacks passaram a ser extremamente positivos.",
+                        image: "./img/foto_aquarela.png"
+                    },
+                    {
+                        name: "Franciezio Santos",
+                        role: "Gestor Vila Trampolim Jóquei",
+                        text: "Gostaria de parabenizar pelo serviço realizado no carpete. Trabalho executado com muita qualidade, capricho e excelente acabamento. O resultado final foi ótimo e fiquei plenamente satisfeito.",
+                        image: "./img/foto_vila_trampolim.png"
+                    },
+                    {
+                        name: "CEO da Alpha Led",
+                        role: "Painéis e Automação",
+                        text: "Minha experiência foi fantástica. Montamos um showroom e entrei em contato com o Walison, que recomendou o melhor produto. Após a instalação, ficou evidente o quanto meu ambiente se valorizou. Hoje posso proporcionar ao meu cliente o melhor em imagem e sonorização.",
+                        image: "./img/foto_led.png"
+                    },
+                    {
+                        name: "Libny Benevides",
+                        role: "CEO GLB Music Escola de Música",
+                        text: "Profissional competente e comprometido. É acessível e cria bom relacionamento. Já fiz alguns projetos com ele e pretendo fazer outros.",
+                        image: "./img/foto_gbl.png"
+                    }
+                ]
+            },
+            contact: {
+                title: "Vamos transformar seu ambiente?",
+                subtitle: "Entre em contato para uma avaliação técnica ou solicite um orçamento.",
+                info: {
+                    phone: "(85) 99420-7215",
+                    email: "vamusdecorar@gmail.com",
+                    address: "Rua doutor Airton Bezerra, 300 - Bairro José de Alencar - Fortaleza, CE",
+                    whatsapp: "https://w.app/bq63ue"
+                }
+            },
+            footer: {
+                text: "Soluções acústicas que unem técnica, design e experiência.",
+                phone: "(85) 99420-7215",
+                email: "vamusdecorar@gmail.com",
+                address: "Rua doutor Airton Bezerra, 300 - Bairro José de Alencar - Fortaleza, CE",
+                social: "@vdacustica"
+            }
+        };
+
+        // Componentes
+        const useTheme = () => SITE_CONTENT.theme;
+
+        const Button = ({ children, variant = 'primary', className = "", ...props }) => {
+            const theme = useTheme();
+            const styles = variant === 'primary' 
+                ? { backgroundColor: theme.accentColor, color: '#fff' }
+                : { backgroundColor: 'transparent', color: theme.primaryColor, borderColor: theme.primaryColor, borderWidth: '2px' };
+
+            return (
+                <button
+                    className={`px-8 py-3 rounded-lg font-bold transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-lg text-base flex items-center justify-center gap-2 ${className}`}
+                    style={styles}
+                    {...props}
+                >
+                    {children}
+                </button>
+            );
+        };
+
+        // Handler de erro para imagens
+        const handleImageError = (e) => {
+            e.target.src = "https://placehold.co/600x400/eee/999?text=Imagem+N%C3%A3o+Encontrada";
+        };
+
+        const Navbar = () => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [scrolled, setScrolled] = useState(false);
+            const theme = useTheme();
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 20);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const scrollTo = (id) => {
+                setIsOpen(false);
+                const element = document.getElementById(id);
+                if (element) element.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            return (
+                <nav 
+                    className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? "shadow-md py-3" : "py-5"}`}
+                    style={{ backgroundColor: scrolled ? 'white' : 'transparent' }}
+                >
+                    <div className="container mx-auto px-6 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            {SITE_CONTENT.general.logoUrl ? (
+                                <img 
+                                    src={SITE_CONTENT.general.logoUrl} 
+                                    alt={SITE_CONTENT.general.brandName} 
+                                    className="h-10 md:h-12 w-auto object-contain" 
+                                    onError={handleImageError}
+                                />
+                            ) : (
+                                <div className={`text-2xl font-bold tracking-tighter flex items-center gap-2 ${scrolled ? "text-gray-900" : "text-white"}`}>
+                                    <span>{SITE_CONTENT.general.brandName}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="hidden md:flex items-center gap-8">
+                            {["Sobre", "Serviços", "Diferenciais"].map((item) => (
+                                <button 
+                                    key={item}
+                                    onClick={() => scrollTo(item.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ""))}
+                                    className={`font-medium hover:opacity-70 transition-opacity uppercase text-sm tracking-wide ${scrolled ? "text-gray-700" : "text-gray-100"}`}
+                                >
+                                    {item}
+                                </button>
+                            ))}
+                            <a 
+                                href={SITE_CONTENT.general.whatsappLink}
+                                target="_blank"
+                                className="px-6 py-2.5 text-white rounded-lg font-bold transition-all shadow-lg hover:shadow-xl hover:scale-105 uppercase text-sm tracking-wide"
+                                style={{ backgroundColor: theme.accentColor }}
+                            >
+                                {SITE_CONTENT.general.ctaText}
+                            </a>
+                        </div>
+                        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+                            {isOpen ? <X className={scrolled ? "text-gray-900" : "text-white"} /> : <Menu className={scrolled ? "text-gray-900" : "text-white"} />}
+                        </button>
+                    </div>
+                    {isOpen && (
+                        <div className="absolute top-full left-0 w-full bg-white shadow-xl py-6 px-6 flex flex-col gap-4 md:hidden border-t">
+                             {["Sobre", "Serviços", "Diferenciais"].map((item) => (
+                                <button 
+                                    key={item}
+                                    onClick={() => scrollTo(item.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ""))}
+                                    className="text-gray-800 font-medium text-left py-3 border-b border-gray-100"
+                                >
+                                    {item}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </nav>
+            );
+        };
+
+        const Hero = () => {
+            const theme = useTheme();
+            return (
+                <section className="relative min-h-screen flex items-center pt-20 pb-20 md:pb-0 overflow-hidden">
+                    <div className="absolute inset-0 z-0">
+                        <img src={SITE_CONTENT.hero.backgroundImage} alt="Background" className="w-full h-full object-cover" onError={handleImageError} />
+                        <div className="absolute inset-0 opacity-90" style={{ background: `linear-gradient(to right, ${theme.primaryColor}, ${theme.primaryColor}E6, ${theme.secondaryColor}80)` }}></div>
+                    </div>
+                    <div className="container mx-auto px-6 relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                        <div className="text-white space-y-8 animate-fade-in-up">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide uppercase bg-white/10 border border-white/20 backdrop-blur-sm">
+                                <Volume2 className="w-4 h-4" /> Soluções Acústicas & Design
+                            </div>
+                            <h1 className="text-5xl md:text-6xl font-bold leading-tight">{SITE_CONTENT.hero.title}</h1>
+                            <p className="text-xl text-gray-200 max-w-lg leading-relaxed font-light">{SITE_CONTENT.hero.subtitle}</p>
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                                <a href={SITE_CONTENT.general.whatsappLink} target="_blank">
+                                    <button className="px-8 py-4 rounded-lg font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-transform hover:-translate-y-1 bg-white" style={{ color: theme.accentColor }}>
+                                        {SITE_CONTENT.hero.buttonText} <ArrowRight className="w-5 h-5" />
+                                    </button>
+                                </a>
+                                <button onClick={() => document.getElementById('servicos').scrollIntoView({behavior: 'smooth'})} className="px-8 py-4 rounded-lg font-semibold border border-white/30 hover:bg-white/10 text-white transition-all text-lg">
+                                    Conhecer Soluções
+                                </button>
+                            </div>
+                        </div>
+                         <div className="hidden md:block relative">
+                            <div className="absolute top-10 right-10 w-20 h-20 rounded-full opacity-20 blur-xl bg-white"></div>
+                            <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl border border-white/20 shadow-2xl max-w-md ml-auto">
+                                <Quote className="w-10 h-10 text-white/60 mb-4" />
+                                <p className="text-lg text-white italic font-light">"A Vamus Decorar une a precisão técnica da engenharia com a sensibilidade estética da decoração."</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const StatsBar = () => {
+            const theme = useTheme();
+            return (
+                <div className="bg-white py-12 border-b border-gray-100 relative z-20 -mt-8 mx-4 md:mx-auto md:max-w-6xl rounded-xl shadow-xl flex flex-col md:flex-row justify-around items-center gap-8 text-center">
+                    {SITE_CONTENT.about.stats.map((stat, i) => (
+                        <div key={i} className="flex flex-col items-center">
+                            <span className="text-4xl font-bold mb-1" style={{ color: theme.accentColor }}>{stat.value}</span>
+                            <span className="text-gray-500 font-medium uppercase text-sm tracking-wider">{stat.label}</span>
+                        </div>
+                    ))}
+                </div>
+            )
+        };
+
+        const Problems = () => {
+            const theme = useTheme();
+            return (
+                <section className="py-20" style={{ backgroundColor: theme.offWhite }}>
+                    <div className="container mx-auto px-6">
+                        <div className="text-center max-w-3xl mx-auto mb-16">
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{SITE_CONTENT.problems.title}</h2>
+                            <p className="text-gray-600 text-lg leading-relaxed">{SITE_CONTENT.problems.subtitle}</p>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {SITE_CONTENT.problems.cards.map((card, index) => {
+                                const Icon = card.icon;
+                                return (
+                                    <div key={index} className="p-8 rounded-xl border border-gray-100 bg-white hover:border-gray-200 hover:shadow-lg transition-all text-center group">
+                                        <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-6 transition-colors" style={{ backgroundColor: `${theme.accentColor}10`, color: theme.accentColor }}>
+                                            <Icon size={32} />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
+                                        <p className="text-gray-600">{card.description}</p>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </section>
+            )
+        };
+
+        const About = () => {
+            const theme = useTheme();
+            return (
+                <section id="sobre" className="py-24 bg-white overflow-hidden">
+                    <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+                        <div className="relative">
+                            <div className="absolute -left-6 -top-6 w-full h-full rounded-3xl -z-10 opacity-20" style={{ backgroundColor: theme.accentColor }}></div>
+                            <img src={SITE_CONTENT.about.image} onError={handleImageError} alt="Obra" className="rounded-2xl shadow-2xl w-full object-cover h-[500px] relative z-10" />
+                            <div className="absolute bottom-10 -right-6 md:right-10 bg-white p-6 rounded-xl shadow-xl z-20 max-w-[200px] border-l-4" style={{ borderColor: theme.accentColor }}>
+                                <Hammer className="w-8 h-8 mb-3" style={{ color: theme.accentColor }} />
+                                <p className="font-bold text-gray-900 leading-tight">Mão de obra especializada</p>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style={{ backgroundColor: `${theme.accentColor}15`, color: theme.accentColor }}>Quem Somos</div>
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">{SITE_CONTENT.about.title}</h2>
+                            <div className="space-y-6 text-lg text-gray-600">
+                                <p>{SITE_CONTENT.about.text1}</p>
+                                <p>{SITE_CONTENT.about.text2}</p>
+                            </div>
+                            <div className="mt-10 pt-10 border-t border-gray-100 flex flex-col sm:flex-row gap-6">
+                                <a href={SITE_CONTENT.general.whatsappLink} target="_blank">
+                                    <Button>Conversar com Consultor</Button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Services = () => {
+            const theme = useTheme();
+            return (
+                <section id="servicos" className="py-24" style={{ backgroundColor: theme.offWhite }}>
+                    <div className="container mx-auto px-6">
+                        <div className="text-center max-w-3xl mx-auto mb-16">
+                            <span className="font-bold tracking-wider text-sm uppercase mb-3 block" style={{ color: theme.accentColor }}>O que fazemos</span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{SITE_CONTENT.services.title}</h2>
+                            <p className="text-gray-600 text-lg leading-relaxed">{SITE_CONTENT.services.description}</p>
+                        </div>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {SITE_CONTENT.services.items.map((service, index) => {
+                                const Icon = service.icon;
+                                return (
+                                    <div key={index} className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group border border-gray-100 hover:-translate-y-1">
+                                        <div className="w-14 h-14 rounded-lg flex items-center justify-center mb-6 transition-colors group-hover:text-white" style={{ backgroundColor: `${theme.accentColor}15`, color: theme.accentColor }}>
+                                            <Icon size={28} />
+                                            <style>{`.group:hover .w-14 { background-color: ${theme.accentColor} !important; } .group:hover .w-14 svg { color: white !important; }`}</style>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h3>
+                                        <p className="text-gray-600 leading-relaxed">{service.description}</p>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Differentials = () => {
+            const theme = useTheme();
+            return (
+                <section id="diferenciais" className="py-24 text-white" style={{ backgroundColor: theme.primaryColor }}>
+                    <div className="container mx-auto px-6">
+                        <div className="grid lg:grid-cols-2 gap-12 items-center">
+                            <div>
+                                <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">{SITE_CONTENT.differentials.title}</h2>
+                                <h3 className="text-xl md:text-2xl font-semibold mb-6 text-gray-200">{SITE_CONTENT.differentials.subtitle}</h3>
+                                <p className="text-lg text-gray-300 mb-10 border-l-4 pl-4 border-white/30">{SITE_CONTENT.differentials.description}</p>
+                                
+                                <div className="grid gap-6">
+                                    {SITE_CONTENT.differentials.list.map((item, i) => {
+                                        const Icon = item.icon;
+                                        return (
+                                            <div key={i} className="flex gap-4 p-5 rounded-xl transition-colors bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20">
+                                                <div className="mt-1 min-w-[24px]">
+                                                    <Icon className="w-8 h-8 text-white" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-xl font-bold mb-1 text-white">{item.title}</h4>
+                                                    <p className="text-gray-300 text-sm leading-relaxed">{item.text}</p>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            
+                            {/* IMAGEM À DIREITA */}
+                            <div className="relative h-full min-h-[500px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10 group">
+                                <img 
+                                    src={SITE_CONTENT.differentials.image} 
+                                    onError={handleImageError}
+                                    alt="Diferenciais VD Acústica" 
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8">
+                                    <div className="bg-white/20 backdrop-blur-md p-4 rounded-xl border border-white/10 inline-block">
+                                        <p className="text-white font-bold text-lg flex items-center gap-2">
+                                            <Award className="w-5 h-5" /> Qualidade Garantida
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // NOVA COMPONENTE DE SEGMENTOS
+        const Segments = () => {
+            const theme = useTheme();
+            return (
+                <section id="segmentos" className="py-24 bg-white">
+                    <div className="container mx-auto px-6">
+                        <div className="text-center max-w-3xl mx-auto mb-16">
+                            <span className="font-bold tracking-wider text-sm uppercase mb-3 block" style={{ color: theme.accentColor }}>Segmentos</span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{SITE_CONTENT.segments.title}</h2>
+                            <p className="text-gray-600 text-lg leading-relaxed">{SITE_CONTENT.segments.subtitle}</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {SITE_CONTENT.segments.items.map((item, index) => {
+                                const Icon = item.icon;
+                                return (
+                                    <div key={index} className="group relative overflow-hidden rounded-2xl aspect-[4/3] cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500">
+                                        {/* Imagem de Fundo */}
+                                        <img 
+                                            src={item.image} 
+                                            onError={handleImageError}
+                                            alt={item.title} 
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                        />
+                                        {/* Overlay Escuro */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+                                        
+                                        {/* Conteúdo */}
+                                        <div className="absolute bottom-0 left-0 w-full p-8 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                                    {Icon ? <Icon size={20} className="text-white" /> : null}
+                                                </div>
+                                                <h3 className="text-2xl font-bold">{item.title}</h3>
+                                            </div>
+                                            <div className="h-1 w-0 bg-white group-hover:w-full transition-all duration-500 delay-100"></div>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // NOVA COMPONENTE DE DEPOIMENTOS
+        const Testimonials = () => {
+            const theme = useTheme();
+            return (
+                <section id="depoimentos" className="py-24" style={{ backgroundColor: theme.offWhite }}>
+                    <div className="container mx-auto px-6">
+                        <div className="text-center max-w-3xl mx-auto mb-16">
+                            <span className="font-bold tracking-wider text-sm uppercase mb-3 block" style={{ color: theme.accentColor }}>Depoimentos</span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{SITE_CONTENT.testimonials.title}</h2>
+                            <p className="text-gray-600 text-lg leading-relaxed">{SITE_CONTENT.testimonials.subtitle}</p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {SITE_CONTENT.testimonials.items.map((item, index) => (
+                                <div key={index} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 relative hover:shadow-md transition-shadow">
+                                    <div className="absolute top-6 right-8 text-gray-200">
+                                        <Quote size={40} fill="currentColor" />
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <img 
+                                            src={item.image} 
+                                            onError={handleImageError}
+                                            alt={item.name} 
+                                            className="w-14 h-14 rounded-full object-cover border-2 shrink-0"
+                                            style={{ borderColor: theme.accentColor }}
+                                        />
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 text-lg">{item.name}</h4>
+                                            <p className="text-sm text-gray-500 uppercase tracking-wide font-medium">{item.role}</p>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-gray-600 italic relative z-10 leading-relaxed text-base">
+                                        "{item.text}"
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // NOVA COMPONENTE DE CONTATO
+        const Contact = () => {
+            const theme = useTheme();
+            const [formState, setFormState] = useState({ name: '', email: '', phone: '', type: '', message: '' });
+
+            const handleChange = (e) => {
+                setFormState({ ...formState, [e.target.name]: e.target.value });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const text = `
+*Nova Solicitação de Orçamento - Site Vamus Decorar*
+------------------------------------------------
+*Nome:* ${formState.name}
+*Telefone:* ${formState.phone}
+*Email:* ${formState.email}
+*Tipo de Projeto:* ${formState.type}
+*Mensagem:* ${formState.message}
+                `.trim();
+
+                const whatsappUrl = `${SITE_CONTENT.general.whatsappLink}?text=${encodeURIComponent(text)}`;
+                window.open(whatsappUrl, '_blank');
+                setFormState({ name: '', email: '', phone: '', type: '', message: '' });
+            };
+
+            return (
+                <section id="contato" className="py-24 bg-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-1/2 h-full bg-gray-50 -z-10 hidden lg:block"></div>
+
+                    <div className="container mx-auto px-6">
+                        <div className="grid lg:grid-cols-2 gap-16 items-start">
+                            
+                            {/* Coluna da Esquerda: Informações */}
+                            <div>
+                                <span className="font-bold tracking-wider text-sm uppercase mb-3 block" style={{ color: theme.accentColor }}>Contato</span>
+                                <h2 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">{SITE_CONTENT.contact.title}</h2>
+                                <p className="text-gray-600 text-lg mb-10 leading-relaxed">{SITE_CONTENT.contact.subtitle}</p>
+                                
+                                <div className="space-y-8">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-white shadow-lg" style={{ backgroundColor: theme.accentColor }}>
+                                            <Phone size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 text-lg mb-1">Telefone</h4>
+                                            <p className="text-gray-600">{SITE_CONTENT.contact.info.phone}</p>
+                                            <p className="text-sm text-gray-500 mt-1">Seg a Sex, das 8h às 18h</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-white shadow-lg" style={{ backgroundColor: theme.accentColor }}>
+                                            <Mail size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 text-lg mb-1">Email</h4>
+                                            <p className="text-gray-600">{SITE_CONTENT.contact.info.email}</p>
+                                            <p className="text-sm text-gray-500 mt-1">Resposta em até 24h</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-white shadow-lg" style={{ backgroundColor: theme.accentColor }}>
+                                            <MapPin size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 text-lg mb-1">Localização</h4>
+                                            <p className="text-gray-600">{SITE_CONTENT.contact.info.address}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-12 p-6 rounded-xl border border-blue-100 bg-blue-50">
+                                    <p className="font-semibold text-gray-800 mb-4">Prefere conversar agora?</p>
+                                    <a 
+                                        href={SITE_CONTENT.contact.info.whatsapp} 
+                                        target="_blank" 
+                                        className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-white transition-transform hover:-translate-y-1 shadow-md bg-[#25D366]"
+                                    >
+                                        <Phone size={18} /> Chamar no WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Coluna da Direita: Formulário */}
+                            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-gray-100">
+                                <h3 className="text-2xl font-bold text-gray-900 mb-6">Solicite um Orçamento</h3>
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div className="grid md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Nome</label>
+                                            <input 
+                                                type="text" 
+                                                name="name" 
+                                                value={formState.name}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                                                placeholder="Seu nome"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+                                            <input 
+                                                type="tel" 
+                                                name="phone"
+                                                value={formState.phone}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                                                placeholder="(00) 00000-0000"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                        <input 
+                                            type="email" 
+                                            name="email"
+                                            value={formState.email}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                                            placeholder="seu@email.com"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Projeto</label>
+                                        <select 
+                                            name="type"
+                                            value={formState.type}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all bg-white"
+                                        >
+                                            <option value="">Selecione uma opção</option>
+                                            <option value="Igreja/Templo">Igreja ou Templo</option>
+                                            <option value="Escritorio">Escritório Corporativo</option>
+                                            <option value="Estudio">Estúdio de Gravação</option>
+                                            <option value="Residencial">Residencial / Home Theater</option>
+                                            <option value="Outro">Outro</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Mensagem</label>
+                                        <textarea 
+                                            name="message"
+                                            value={formState.message}
+                                            onChange={handleChange}
+                                            rows="4"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none"
+                                            placeholder="Conte um pouco sobre sua necessidade..."
+                                        ></textarea>
+                                    </div>
+
+                                    <button 
+                                        type="submit" 
+                                        className="w-full py-4 rounded-lg font-bold text-white transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 text-lg"
+                                        style={{ backgroundColor: theme.accentColor }}
+                                    >
+                                        Enviar Solicitação
+                                    </button>
+                                    <p className="text-xs text-gray-500 text-center mt-4">
+                                        Seus dados estão seguros conosco.
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Footer = () => {
+            const theme = useTheme();
+            return (
+                <footer className="text-white pt-16 pb-8 border-t border-white/10" style={{ backgroundColor: theme.primaryColor }}>
+                    <div className="container mx-auto px-6 grid md:grid-cols-4 gap-12 mb-12">
+                        <div className="col-span-1 md:col-span-2">
+                            <span className="text-2xl font-bold text-white block mb-4">{SITE_CONTENT.general.brandName}</span>
+                            <p className="text-lg mb-6 max-w-md text-white/80">{SITE_CONTENT.footer.text}</p>
+                            <div className="flex gap-4">
+                                <a href="https://www.instagram.com/vdacustica/" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                                    <Instagram size={20} className="text-white" />
+                                </a>
+                                {/*<a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                                    <Linkedin size={20} className="text-white" />
+                                </a>*/}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 className="text-white font-bold mb-6 text-lg">Navegação</h4>
+                            <ul className="space-y-3">
+                                {["Sobre", "Serviços", "Diferenciais", "Depoimentos", "Contato"].map(item => (
+                                    <li key={item}>
+                                        <button 
+                                            onClick={() => document.getElementById(item.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "")).scrollIntoView({behavior: 'smooth'})}
+                                            className="hover:text-white/80 transition-colors text-white/90"
+                                        >
+                                            {item}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 className="text-white font-bold mb-6 text-lg">Fale Conosco</h4>
+                            <ul className="space-y-4">
+                                <li className="flex items-center gap-3 text-white/90">
+                                    <Phone size={18} className="text-white" /> 
+                                    {SITE_CONTENT.footer.phone}
+                                </li>
+                                <li className="flex items-center gap-3 text-white/90">
+                                    <Mail size={18} className="text-white" /> 
+                                    {SITE_CONTENT.footer.email}
+                                </li>
+                                <li className="flex items-start gap-3 text-white/90">
+                                    <MapPin size={18} className="text-white mt-1 shrink-0" /> 
+                                    <span className="leading-tight">{SITE_CONTENT.footer.address}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="container mx-auto px-6 pt-8 border-t border-white/20 text-center text-sm text-white/60">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <span>&copy; {new Date().getFullYear()} {SITE_CONTENT.general.brandName}. Todos os direitos reservados.</span>
+                            <span>Desenvolvido por IVEL TECH: Soluções | IA.</span>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+
+        const App = () => {
+            return (
+                <div className="antialiased bg-white">
+                    <Navbar />
+                    <Hero />
+                    <StatsBar />
+                    <Problems />
+                    <About />
+                    <Services />
+                    <Differentials />
+                    <Segments /> 
+                    <Testimonials /> 
+                    <Contact /> 
+                    <Footer />
+                    <a href={SITE_CONTENT.general.whatsappLink} target="_blank" className="fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg hover:scale-110 transition-transform bg-green-500 text-white">
+                        <Phone size={24} className="text-white" />
+                    </a>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
