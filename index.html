@@ -6,80 +6,89 @@
     <title>Vamus Decorar | Soluções Profissionais em Acústica</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; }
-        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .error-container { background: #fee; border: 1px solid #fcc; color: #c33; padding: 20px; margin: 20px; border-radius: 8px; font-family: monospace; }
+        .error-box { background: #fee; border: 2px solid #c33; color: #c33; padding: 20px; margin: 20px; border-radius: 8px; }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        class ErrorBoundary extends React.Component {
-            constructor(props) { super(props); this.state = { hasError: false, error: null, errorInfo: null }; }
-            static getDerivedStateFromError(error) { return { hasError: true }; }
-            componentDidCatch(error, errorInfo) { console.error('❌ ERRO NO REACT:', error); console.error('Stack:', errorInfo.componentStack); this.setState({ error: error, errorInfo: errorInfo }); }
-            render() {
-                if (this.state.hasError) {
-                    return (
-                        <div className="error-container">
-                            <h1>⚠️ Erro ao carregar a aplicação</h1>
-                            <p><strong>Erro:</strong> {this.state.error?.toString()}</p>
-                            <details style={{ marginTop: '10px', whiteSpace: 'pre-wrap' }}>
-                                <summary>Detalhes técnicos (clique para expandir)</summary>
-                                <code>{this.state.errorInfo?.componentStack}</code>
-                            </details>
-                            <p style={{ marginTop: '15px', fontSize: '12px' }}>ℹ️ Abra o DevTools (F12) → Console para mais informações</p>
-                        </div>
-                    );
-                }
-                return this.props.children;
-            }
-        }
+    <script>
+        console.log('✅ Iniciando aplicação...');
+        console.log('React versão:', React.version);
+
         window.APP_LOGS = [];
-        function logMessage(level, message, data = null) {
-            const timestamp = new Date().toISOString();
-            const logEntry = { timestamp, level, message, data };
-            window.APP_LOGS.push(logEntry);
-            const prefix = { 'INFO': 'ℹ️', 'WARN': '⚠️', 'ERROR': '❌', 'SUCCESS': '✅' }[level] || '📝';
-            console[level.toLowerCase()](`${prefix} [${timestamp}] ${message}`, data || '');
-        }
-        window.addEventListener('error', (event) => { logMessage('ERROR', 'Erro Global Capturado', { message: event.message, filename: event.filename, lineno: event.lineno, colno: event.colno, error: event.error?.toString() }); });
-        window.addEventListener('unhandledrejection', (event) => { logMessage('ERROR', 'Promise Rejection Não Tratada', { reason: event.reason?.toString() }); });
-        logMessage('INFO', 'Iniciando aplicação...');
-        logMessage('INFO', 'React versão:', React.version);
-        logMessage('INFO', 'ReactDOM disponível:', !!ReactDOM);
-        function App() {
-            const [isLoading, setIsLoading] = useState(true);
-            useEffect(() => { try { logMessage('SUCCESS', 'Aplicação renderizada com sucesso'); setIsLoading(false); } catch (err) { logMessage('ERROR', 'Erro no useEffect', err.toString()); } }, []);
-            if (isLoading) { return (<div className="w-full h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div><p className="text-gray-600">Carregando...</p></div></div>); }
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-                    <header className="bg-white shadow-sm"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"><h1 className="text-3xl font-bold text-gray-900 animate-fade-in-up">✅ Vamus Decorar</h1><p className="text-gray-600 mt-2">Soluções Profissionais em Acústica</p></div></header>
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"><div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6"><h2 className="text-lg font-semibold text-green-900 mb-2">✅ Status: Funcionando Normalmente</h2><p className="text-green-700 text-sm">React renderizou com sucesso. Clique em F12 para abrir DevTools e verificar logs.</p></div><div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in-up"><div className="bg-white p-8 rounded-lg shadow-lg"><h2 className="text-2xl font-bold text-gray-900 mb-4">Qualidade Acústica</h2><p className="text-gray-600 leading-relaxed">Soluções premium para isolamento e tratamento acústico em espaços residenciais e comerciais.</p><button className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Saiba Mais</button></div><div className="bg-white p-8 rounded-lg shadow-lg"><h2 className="text-2xl font-bold text-gray-900 mb-4">Nossos Serviços</h2><ul className="space-y-3 text-gray-600"><li>✓ Diagnóstico acústico</li><li>✓ Instalação profissional</li><li>✓ Consultoria especializada</li><li>✓ Garantia estendida</li></ul></div></div></div>
-                    <footer className="bg-gray-900 text-white mt-12 p-6"><div className="max-w-7xl mx-auto"><p className="text-center text-gray-400 text-sm">© 2024 Vamus Decorar. Todos os direitos reservados.</p><p className="text-center text-gray-500 text-xs mt-2">Versão: React 18 com Error Boundary | Logs: {window.APP_LOGS.length} eventos</p><p className="text-center text-gray-600 text-xs mt-1">💡 Abra DevTools (F12) e digite <code className="bg-gray-800 px-2 py-1 rounded">window.APP_LOGS</code> para ver o histórico</p></div></footer>
-                </div>
+        function log(level, msg, data) {
+            const entry = { timestamp: new Date().toISOString(), level, msg, data };
+            window.APP_LOGS.push(entry);
+            console[level.toLowerCase() === 'error' ? 'error' : 'log'](
+                `[${level}] ${msg}`, data || ''
             );
         }
+
+        window.addEventListener('error', (e) => {
+            log('ERROR', 'Erro Global', { message: e.message });
+            document.getElementById('root').innerHTML = `<div class="error-box"><h1>❌ Erro</h1><p>${e.message}</p></div>`;
+        });
+
         try {
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            logMessage('INFO', 'Root React criada');
-            root.render(
-                <React.StrictMode>
-                    <ErrorBoundary>
-                        <App />
-                    </ErrorBoundary>
-                </React.StrictMode>
+            const React_createElement = React.createElement;
+            const ReactDOM_createRoot = ReactDOM.createRoot;
+
+            const Header = () => React_createElement('header', { className: 'bg-white shadow-sm' },
+                React_createElement('div', { className: 'max-w-7xl mx-auto px-4 py-6' },
+                    React_createElement('h1', { className: 'text-3xl font-bold' }, '✅ Vamus Decorar'),
+                    React_createElement('p', { className: 'text-gray-600 mt-2' }, 'Soluções Profissionais em Acústica')
+                )
             );
-            logMessage('SUCCESS', 'Render concluído');
-        } catch (err) {
-            logMessage('ERROR', 'Erro ao renderizar aplicação', err.toString());
-            document.getElementById('root').innerHTML = `<div class="error-container" style="margin: 20px;"><h1>❌ Erro Crítico</h1><p>${err.message}</p><p style="font-size: 12px; color: #666; margin-top: 10px;">Abra DevTools (F12) para mais detalhes</p></div>`;
+
+            const Hero = () => React_createElement('section', { className: 'min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12' },
+                React_createElement('div', { className: 'max-w-7xl mx-auto px-4' },
+                    React_createElement('div', { className: 'bg-green-50 border border-green-200 rounded-lg p-4 mb-6' },
+                        React_createElement('h2', { className: 'text-lg font-semibold text-green-900' }, '✅ Status: Funcionando!'),
+                        React_createElement('p', { className: 'text-green-700 text-sm' }, 'React renderizou com sucesso.')
+                    ),
+                    React_createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-8' },
+                        React_createElement('div', { className: 'bg-white p-8 rounded-lg shadow-lg' },
+                            React_createElement('h2', { className: 'text-2xl font-bold mb-4' }, 'Qualidade Acústica'),
+                            React_createElement('p', { className: 'text-gray-600' }, 'Soluções premium para isolamento e tratamento acústico.')
+                        ),
+                        React_createElement('div', { className: 'bg-white p-8 rounded-lg shadow-lg' },
+                            React_createElement('h2', { className: 'text-2xl font-bold mb-4' }, 'Nossos Serviços'),
+                            React_createElement('ul', { className: 'space-y-3 text-gray-600' },
+                                React_createElement('li', null, '✓ Diagnóstico acústico'),
+                                React_createElement('li', null, '✓ Instalação profissional'),
+                                React_createElement('li', null, '✓ Consultoria especializada'),
+                                React_createElement('li', null, '✓ Garantia estendida')
+                            )
+                        )
+                    )
+                )
+            );
+
+            const Footer = () => React_createElement('footer', { className: 'bg-gray-900 text-white p-6' },
+                React_createElement('div', { className: 'max-w-7xl mx-auto text-center' },
+                    React_createElement('p', { className: 'text-gray-400' }, '© 2024 Vamus Decorar')
+                )
+            );
+
+            const App = () => React_createElement(React.Fragment, null,
+                React_createElement(Header),
+                React_createElement(Hero),
+                React_createElement(Footer)
+            );
+
+            log('INFO', 'Renderizando...');
+            const root = ReactDOM_createRoot(document.getElementById('root'));
+            root.render(React_createElement(React.StrictMode, null, React_createElement(App)));
+            log('SUCCESS', 'Aplicação renderizada!');
+
+        } catch (error) {
+            log('ERROR', 'Erro', error.toString());
+            document.getElementById('root').innerHTML = `<div class="error-box"><h1>❌ Erro</h1><p>${error.message}</p></div>`;
+            console.error(error);
         }
     </script>
 </body>
